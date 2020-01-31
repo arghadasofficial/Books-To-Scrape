@@ -42,14 +42,12 @@ import org.jsoup.select.Elements;
  */
 public class Engine {
 
-    private ExtractorEventListener listener;
     private List<CategoryModel> categories;
     private List<PageModel> page;
     private Document document;
-    private String nextPageToken;
+    private String nextPageToken = "";
 
-    public Engine(ExtractorEventListener extractorEventListener) {
-        this.listener = extractorEventListener;
+    public Engine() {
         categories = new ArrayList<>();
         page = new ArrayList<>();
     }
@@ -57,40 +55,59 @@ public class Engine {
     public void startExtracting() {
         if (isFirstCall()) {
             try {
-
+                print("fetching " + new Endpoints().getHomeUrl());
                 fetchUrl(new Endpoints().getHomeUrl());
-                listener.currentlyExtracting(new Endpoints().getHomeUrl());
-                extractCategories();
+                print("exracting first page");
                 extractFirstHomePage();
+                print("extracting categories");
+                extractCategories();
+                print("found " + categories.size() + " categories");
+                System.out.println("-----------------------------------------------------------------------------------------");
                 storeNextPageToken();
-
-                startExtracting();
+                print("scanning all pages from homepage");
+                scrapeHome();
             } catch (IOException ex) {
+                Logger.getLogger(Engine.class.getName()).log(Level.SEVERE, null, ex);
             }
         }
+    }
+
+    private void print(String message) {
+        System.out.println("Engine> " + message);
+    }
+
+    private void scrapeHome() {
         if (!nextPageToken.isBlank()) {
             try {
-                fetchUrl(new Endpoints().getUrlPrefix() + nextPageToken);
-                listener.currentlyExtracting(new Endpoints().getUrlPrefix() + nextPageToken);
+                fetchUrl(nextPageToken);
                 extractListOfBooks();
                 storeNextPageToken();
-                startExtracting();
+                scrapeHome();
             } catch (IOException ex) {
-                try {
-                    fetchUrl(new Endpoints().getUrlPrefixWorkaround() + nextPageToken);
-                    listener.currentlyExtracting(new Endpoints().getUrlPrefixWorkaround() + nextPageToken);
-                    extractListOfBooks();
-                } catch (IOException ex1) {
-                    Logger.getLogger(Engine.class.getName()).log(Level.SEVERE, null, ex1);
-                }
-                storeNextPageToken();
-                startExtracting();
+                Logger.getLogger(Engine.class.getName()).log(Level.SEVERE, null, ex);
             }
         } else {
-            for (PageModel model : page) {
-                System.out.println("Title: " + model.getTitle() + "  |   Price: " + model.getPrice() + "  |   Cover: " + new Endpoints().getUrlPrefix() + 
-                        model.getThumbnail().replace("..", ""));
-                System.out.println("--------------------------------------------------------------------------------------------------------------");
+            print("extracted " + page.size() + " books");
+            System.out.println("-----------------------------------------------------------------------------------------");
+            topics_by_topics();
+        }
+    }
+
+    private void topics_by_topics() {
+        print("extracting books in topic by topic");
+        for (CategoryModel model : categories) {
+            try {
+                print("fetching " + model.getTitle() + " from " + model.getLink());
+                fetchUrl(model.getLink());
+                page.clear();
+                extractListOfBooks();
+                storeNextPageToken();
+                for (PageModel m : page) {
+                    print(m.getTitle());
+                }
+                System.out.println("-----------------------------------------------------------------------------------------");
+            } catch (IOException ex) {
+                Logger.getLogger(Engine.class.getName()).log(Level.SEVERE, null, ex);
             }
         }
     }
@@ -110,7 +127,7 @@ public class Engine {
         Elements categoriesElement = document.select("div.side_categories > ul.nav-list > li").select("ul> li");
         for (Element category : categoriesElement) {
             String title = category.text();
-            String link = category.select("a").attr("href");
+            String link = new Endpoints().getUrlPrefix() + category.select("a").attr("href");
             categories.add(new CategoryModel(title, link));
         }
     }
@@ -128,7 +145,12 @@ public class Engine {
 
     private void storeNextPageToken() {
         if (document.select("ul").select("li").hasClass("next")) {
-            nextPageToken = document.select("ul").select("li.next").select("a").attr("href");
+            String token = document.select("ul").select("li.next").select("a").attr("href");
+            if (token.contains("catalogue")) {
+                nextPageToken = new Endpoints().getUrlPrefix() + token;
+            } else {
+                nextPageToken = new Endpoints().getUrlPrefixWorkaround() + token;
+            }
         } else {
             nextPageToken = "";
         }

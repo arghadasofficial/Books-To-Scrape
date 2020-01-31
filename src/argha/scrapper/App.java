@@ -24,7 +24,6 @@
 package argha.scrapper;
 
 import argha.scrapper.engine.Engine;
-import argha.scrapper.engine.ExtractorEventListener;
 
 /**
  *
@@ -33,22 +32,7 @@ import argha.scrapper.engine.ExtractorEventListener;
 public class App {
 
     public static void main(String[] args) {
-        Engine engine = new Engine(new ExtractorEventListener() {
-            @Override
-            public void goingToExtract(String message) {
-                System.out.println("Going to extract: " + message);
-            }
-
-            @Override
-            public void currentlyExtracting(String message) {
-                System.out.println("Extracting: " + message);
-            }
-
-            @Override
-            public void finishedExtracting(String message) {
-                System.out.println("Finished Extracting: " + message);
-            }
-        });
+        Engine engine = new Engine();
         engine.startExtracting();
     }
 }
