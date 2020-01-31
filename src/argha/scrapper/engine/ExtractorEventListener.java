@@ -21,34 +21,14 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package argha.scrapper;
-
-import argha.scrapper.engine.Engine;
-import argha.scrapper.engine.ExtractorEventListener;
+package argha.scrapper.engine;
 
 /**
  *
  * @author Argha Das
  */
-public class App {
-
-    public static void main(String[] args) {
-        Engine engine = new Engine(new ExtractorEventListener() {
-            @Override
-            public void goingToExtract(String message) {
-                System.out.println("Going to extract: " + message);
-            }
-
-            @Override
-            public void currentlyExtracting(String message) {
-                System.out.println("Extracting: " + message);
-            }
-
-            @Override
-            public void finishedExtracting(String message) {
-                System.out.println("Finished Extracting: " + message);
-            }
-        });
-        engine.startExtracting();
-    }
+public interface ExtractorEventListener {
+    public void goingToExtract(String message);
+    public void currentlyExtracting(String message);
+    public void finishedExtracting(String message);
 }

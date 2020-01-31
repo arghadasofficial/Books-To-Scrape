@@ -26,7 +26,6 @@ package argha.scrapper.util;
 import argha.scrapper.CategoryModel;
 import argha.scrapper.Endpoints;
 import argha.scrapper.PageModel;
-import java.util.ArrayList;
 import java.util.List;
 import org.json.JSONArray;
 import org.json.JSONObject;

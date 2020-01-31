@@ -44,4 +44,9 @@ public class CategoryModel {
     public String getLink() {
         return link;
     }
+
+    @Override
+    public String toString() {
+        return "CategoryModel{" + "title=" + title + ", link=" + link + '}';
+    }
 }

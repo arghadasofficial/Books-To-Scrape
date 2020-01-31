@@ -30,6 +30,7 @@ package argha.scrapper;
 public class Endpoints {
 
     private String homeUrl = "http://books.toscrape.com/index.html";
+    private String urlPrefixWorkaround = "http://books.toscrape.com/catalogue/";
     private String urlPrefix = "http://books.toscrape.com/";
     private String userAgent = "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:72.0) Gecko/20100101 Firefox/72.0";
 
@@ -48,4 +49,9 @@ public class Endpoints {
         return userAgent;
     }
 
+    public String getUrlPrefixWorkaround() {
+        return urlPrefixWorkaround;
+    }
+
+    
 }
